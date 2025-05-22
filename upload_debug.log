@@ -1,0 +1,60 @@
+Array
+(
+    [file_info] => Array
+        (
+            [name] => 2.png
+            [full_path] => 2.png
+            [type] => image/png
+            [tmp_name] => C:\Users\Administrator\AppData\Local\Temp\php906E.tmp
+            [error] => 0
+            [size] => 8133
+        )
+
+    [target_path] => C:/laragon/www/webbanhang/public/uploads/1747902913_2.png
+    [directory_exists] => 1
+    [directory_writable] => 1
+    [error_message] => 
+    [success] => 1
+    [file_exists] => 1
+    [file_size] => 8133
+)
+Array
+(
+    [file_info] => Array
+        (
+            [name] => 2.png
+            [full_path] => 2.png
+            [type] => image/png
+            [tmp_name] => C:\Users\Administrator\AppData\Local\Temp\php70E0.tmp
+            [error] => 0
+            [size] => 8133
+        )
+
+    [target_path] => C:/laragon/www/webbanhang/public/uploads/1747904216_2.png
+    [directory_exists] => 1
+    [directory_writable] => 1
+    [error_message] => 
+    [success] => 1
+    [file_exists] => 1
+    [file_size] => 8133
+)
+Array
+(
+    [file_info] => Array
+        (
+            [name] => 3.png
+            [full_path] => 3.png
+            [type] => image/png
+            [tmp_name] => C:\Users\Administrator\AppData\Local\Temp\phpAE04.tmp
+            [error] => 0
+            [size] => 24612
+        )
+
+    [target_path] => C:/laragon/www/webbanhang/public/uploads/1747905607_3.png
+    [directory_exists] => 1
+    [directory_writable] => 1
+    [error_message] => 
+    [success] => 1
+    [file_exists] => 1
+    [file_size] => 24612
+)

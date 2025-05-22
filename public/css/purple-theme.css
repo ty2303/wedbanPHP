@@ -1,0 +1,226 @@
+:root {
+    --purple-primary: #8a2be2;
+    --purple-secondary: #9370db;
+    --purple-light: #e6e0ff;
+    --purple-hover: #7026b9;
+    --purple-focus: rgba(138, 43, 226, 0.25);
+}
+
+body {
+    background-color: #f8f5ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Title styling */
+.purple-title {
+    color: var(--purple-primary);
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.purple-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, var(--purple-secondary), var(--purple-primary));
+    border-radius: 3px;
+}
+
+/* Card styling */
+.purple-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.1);
+    transition: all 0.3s ease;
+}
+
+.purple-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(138, 43, 226, 0.2);
+}
+
+/* Button styling */
+.btn-purple {
+    background: linear-gradient(to right, var(--purple-primary), var(--purple-secondary));
+    border: none;
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-purple:hover, .btn-purple:focus {
+    background: linear-gradient(to right, var(--purple-hover), var(--purple-primary));
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+}
+
+.btn-outline-purple {
+    color: var(--purple-primary);
+    background: transparent;
+    border: 2px solid var(--purple-primary);
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-purple:hover {
+    background-color: var(--purple-light);
+    color: var(--purple-primary);
+    border-color: var(--purple-hover);
+}
+
+/* Form styling */
+.purple-form .form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+}
+
+.purple-form .form-control:focus {
+    border-color: var(--purple-secondary);
+    box-shadow: 0 0 0 0.25rem var(--purple-focus);
+}
+
+.purple-form .form-label {
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+/* Table styling */
+.purple-table {
+    border-radius: 8px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.purple-table thead {
+    background: linear-gradient(to right, var(--purple-primary), var(--purple-secondary));
+    color: white;
+}
+
+.purple-table th {
+    padding: 15px;
+    font-weight: 500;
+    border: none;
+}
+
+.purple-table td {
+    padding: 12px 15px;
+    border-top: none;
+    border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+
+.purple-table tbody tr:hover {
+    background-color: var(--purple-light);
+    transform: scale(1.01);
+}
+
+/* Alert styling */
+.alert-purple {
+    background-color: var(--purple-light);
+    color: var(--purple-primary);
+    border-left: 4px solid var(--purple-primary);
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.bg-purple {
+    background-color: var(--purple-primary);
+}
+
+.product-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(138, 43, 226, 0.2);
+    border-color: var(--purple-secondary);
+}
+
+.description-box {
+    max-height: 100px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.description-box::-webkit-scrollbar {
+    width: 4px;
+}
+
+.description-box::-webkit-scrollbar-thumb {
+    background-color: var(--purple-secondary);
+    border-radius: 4px;
+}
+
+.btn-group .btn.active {
+    background-color: var(--purple-light);
+    color: var(--purple-primary);
+    border-color: var(--purple-primary);
+}
+
+/* Purple navbar */
+.navbar-purple {
+    background: linear-gradient(to right, var(--purple-primary), var(--purple-secondary));
+}
+
+/* Footer styling */
+.footer-purple {
+    background: linear-gradient(to right, var(--purple-light), #f8f0ff);
+    color: var(--purple-primary);
+    padding: 15px 0;
+    margin-top: 40px;
+}
+
+
+
+        .nav-link {
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link .icon-container {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover .icon-container {
+            background: white;
+            color: var(--purple-primary);
+            transform: rotate(5deg) scale(1.1);
+        }
+        
+        .nav-link i {
+            font-size: 1.2rem;
+        }
+    

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,6 +48,40 @@
                                 <i class="bi bi-folder2"></i>
                             </div>
                             Quản lý danh mục
+                        </a>
+                    </li>
+                    <?php
+                    // After initializing session if not already done
+                    if (session_status() == PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    // Calculate cart count
+                    $cartCount = 0;
+                    if (!empty($_SESSION['cart'])) {
+                        foreach ($_SESSION['cart'] as $quantity) {
+                            $cartCount += $quantity;
+                        }
+                    }
+                    ?>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="/webbanhang/Cart">
+                            <div class="icon-container">
+                                <i class="bi bi-cart"></i>
+                                <?php if ($cartCount > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        <?php echo $cartCount; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            Giỏ hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/webbanhang/Cart/orders">
+                            <div class="icon-container">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                            Đơn hàng
                         </a>
                     </li>
                 </ul>

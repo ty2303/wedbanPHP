@@ -68,10 +68,16 @@
                 </div>
                 
                 <div class="card-footer bg-light">
-                    <div class="d-flex justify-content-between">
-                        <a href="/webbanhang/Product/show/<?php echo $product->id; ?>" class="btn btn-primary btn-sm flex-grow-1 mx-1">
+                    <div class="d-flex justify-content-between mb-2">
+                        <a href="/webbanhang/Product/show/<?php echo $product->id; ?>" class="btn btn-primary btn-sm">
                             <i class="bi bi-eye"></i> Xem
                         </a>
+                        <a href="/webbanhang/Cart/add/<?php echo $product->id; ?>?stay_on_page=true" 
+                           class="btn btn-success btn-sm add-to-cart-btn" data-product-id="<?php echo $product->id; ?>">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-between">
                         <a href="/webbanhang/Product/edit/<?php echo $product->id; ?>" class="btn btn-purple btn-sm flex-grow-1 mx-1">
                             <i class="bi bi-pencil"></i> Sửa
                         </a>
@@ -81,7 +87,6 @@
                             <i class="bi bi-trash"></i> Xóa
                         </a>
                     </div>
-                    <button class="btn btn-outline-secondary btn-sm mt-2 w-100"><i class="bi bi-heart"></i></button>
                 </div>
             </div>
         </div>
@@ -136,6 +141,10 @@
                             <a href="/webbanhang/Product/show/<?php echo $product->id; ?>" class="btn btn-primary">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            <a href="/webbanhang/Cart/add/<?php echo $product->id; ?>?stay_on_page=true" 
+                               class="btn btn-success add-to-cart-btn" data-product-id="<?php echo $product->id; ?>">
+                                <i class="bi bi-cart-plus"></i>
+                            </a>
                             <a href="/webbanhang/Product/edit/<?php echo $product->id; ?>" class="btn btn-purple">
                                 <i class="bi bi-pencil"></i>
                             </a>
@@ -153,11 +162,17 @@
     </div>
 <?php endif; ?>
 
-<!-- Add DataTables CSS and JS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<!-- Toast notification for cart -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-cart-check-fill me-2"></i> Sản phẩm đã được thêm vào giỏ hàng!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
 
 <script>
     $(document).ready(function() {
@@ -193,6 +208,35 @@
             $('#cardViewBtn').removeClass('active');
             $('#tableView').removeClass('d-none');
             $('#cardView').addClass('d-none');
+        });
+
+        // Handle toast notifications for "Add to Cart" buttons
+        $('.add-to-cart-btn').click(function(e) {
+            e.preventDefault();
+            
+            const productId = $(this).data('product-id');
+            const url = $(this).attr('href');
+            
+            // Make an AJAX request to add the product to cart
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Show the toast notification
+                    const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                    toast.show();
+                    
+                    // Update the cart count in the navbar
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                },
+                error: function() {
+                    // If AJAX fails, fall back to regular link
+                    window.location.href = url;
+                }
+            });
         });
     });
 </script>

@@ -59,13 +59,20 @@
 </div>
                 
                 <div class="d-flex flex-wrap mb-4 gap-2">
-                    <button class="btn btn-purple d-flex align-items-center">
-                        <i class="bi bi-cart-plus me-2"></i> Thêm vào giỏ hàng
-                    </button>
-                    <button class="btn btn-outline-purple d-flex align-items-center">
-                        <i class="bi bi-heart me-2"></i> Yêu thích
-                    </button>
-                </div>
+    <form action="/webbanhang/Cart/add/<?php echo $product->id; ?>" method="post" class="d-flex align-items-center">
+        <div class="input-group me-2" style="width: 130px;">
+            <button type="button" class="btn btn-outline-secondary" onclick="decrementQty()">-</button>
+            <input type="number" class="form-control text-center" name="quantity" id="quantity" value="1" min="1" max="10">
+            <button type="button" class="btn btn-outline-secondary" onclick="incrementQty()">+</button>
+        </div>
+        <button type="submit" class="btn btn-purple d-flex align-items-center">
+            <i class="bi bi-cart-plus me-2"></i> Thêm vào giỏ hàng
+        </button>
+    </form>
+    <button class="btn btn-outline-purple d-flex align-items-center">
+        <i class="bi bi-heart me-2"></i> Yêu thích
+    </button>
+</div>
                 
                 <div class="border-top pt-3 mt-4">
                     <div class="d-flex justify-content-between">
@@ -198,5 +205,23 @@
         <?php endforeach; ?>
     <?php endif; ?>
 </div>
+
+<script>
+function incrementQty() {
+    const input = document.getElementById('quantity');
+    const currentValue = parseInt(input.value);
+    if (currentValue < 10) {
+        input.value = currentValue + 1;
+    }
+}
+
+function decrementQty() {
+    const input = document.getElementById('quantity');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+    }
+}
+</script>
 
 <?php include 'app/views/shares/footer.php'; ?>

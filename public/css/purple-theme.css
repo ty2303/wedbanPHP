@@ -186,8 +186,6 @@ body {
     margin-top: 40px;
 }
 
-
-
         .nav-link {
             border-radius: 10px;
             padding: 10px 16px;
@@ -223,4 +221,33 @@ body {
         .nav-link i {
             font-size: 1.2rem;
         }
-    
+
+        /* Cart badge styling */
+.nav-link .badge {
+    font-size: 0.65rem;
+    padding: 0.2em 0.45em;
+    margin-left: -10px;
+    margin-top: -5px;
+}
+
+/* Cart quantity controls */
+.qty-btn {
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Order status badges */
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--purple-primary) !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}

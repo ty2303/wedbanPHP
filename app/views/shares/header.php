@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm</title>
+    <title> TITI Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/webbanhang/public/css/purple-theme.css">
@@ -30,10 +29,8 @@
         <div class="container">
             <a class="navbar-brand fw-bold" href="/webbanhang">
                 <div class="d-flex align-items-center">
-                    <span class="bg-white text-purple p-2 me-2 rounded-circle">
-                        <i class="bi bi-shop"></i>
-                    </span>
-                    Quản lý sản phẩm
+                    <img src="/webbanhang/public/logo/a.png" alt="TITI Shop" height="40" class="me-2">
+                    <span class="d-none d-sm-inline">TITI Shop</span>
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -99,7 +96,14 @@
                             Đơn hàng
                         </a>
                     </li>
-                    
+                    <li class="nav-item">
+    <a class="nav-link" href="/webbanhang/Report">
+        <div class="icon-container">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        Báo cáo
+    </a>
+</li>
                 </ul>
             </div>
         </div>

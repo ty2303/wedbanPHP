@@ -8,10 +8,25 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/webbanhang/public/css/purple-theme.css">
-  
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <style>
+        /* Add padding to body to prevent content from being hidden under fixed navbar */
+        body {
+            padding-top: 76px; /* Adjust this value based on your navbar height */
+        }
+        
+        /* Optional: Add shadow to navbar when scrolled */
+        .navbar-shadow {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-purple mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-purple fixed-top mb-4" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/webbanhang">
                 <div class="d-flex align-items-center">
@@ -84,8 +99,20 @@
                             Đơn hàng
                         </a>
                     </li>
+                    
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container mt-4">
+    
+    <script>
+        // Add shadow effect to navbar when scrolling
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 10) {
+                $('#mainNavbar').addClass('navbar-shadow');
+            } else {
+                $('#mainNavbar').removeClass('navbar-shadow');
+            }
+        });
+    </script>

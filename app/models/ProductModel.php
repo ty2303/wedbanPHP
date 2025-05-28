@@ -143,5 +143,52 @@ class ProductModel
         }
         return false;
     }
+    
+    public function getFilteredProducts($search = null, $minPrice = null, $maxPrice = null, $categories = [])
+    {
+        $query = "SELECT p.id, p.name, p.description, p.price, p.image, c.name as category_name
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN category c ON p.category_id = c.id
+                  WHERE 1=1";
+        
+        $params = [];
+        
+        // Add search condition
+        if (!empty($search)) {
+            $query .= " AND p.name LIKE :search";
+            $params[':search'] = "%$search%";
+        }
+        
+        // Add minimum price condition
+        if (!empty($minPrice)) {
+            $query .= " AND p.price >= :min_price";
+            $params[':min_price'] = $minPrice;
+        }
+        
+        // Add maximum price condition
+        if (!empty($maxPrice)) {
+            $query .= " AND p.price <= :max_price";
+            $params[':max_price'] = $maxPrice;
+        }
+        
+        // Add category filter
+        if (!empty($categories)) {
+            // Convert array of categories to string like "1,2,3"
+            $categoryList = implode(',', array_map('intval', $categories));
+            $query .= " AND p.category_id IN ($categoryList)";
+        }
+        
+        $stmt = $this->conn->prepare($query);
+        
+        // Bind named parameters
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        return $result;
+    }
 }
 ?>

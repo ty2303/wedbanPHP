@@ -25,7 +25,14 @@ class ProductController
     
     public function index()
     {
-        $products = $this->productModel->getProducts();
+        // Get filter parameters from URL
+        $search = isset($_GET['search']) ? trim($_GET['search']) : null;
+        $minPrice = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? $_GET['min_price'] : null;
+        $maxPrice = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? $_GET['max_price'] : null;
+        $categories = isset($_GET['categories']) ? $_GET['categories'] : [];
+        
+        // Get filtered products
+        $products = $this->productModel->getFilteredProducts($search, $minPrice, $maxPrice, $categories);
         include 'app/views/product/list.php';
     }
     

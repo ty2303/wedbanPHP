@@ -19,10 +19,11 @@
         <div class="table-responsive">
             <table class="table purple-table">
                 <thead>
-                    <tr>
-                        <th>ID</th>
+                    <tr>                        <th>ID</th>
                         <th>Khách hàng</th>
                         <th>Số điện thoại</th>
+                        <th>Tạm tính</th>
+                        <th>Giảm giá</th>
                         <th>Tổng tiền</th>
                         <th>Số sản phẩm</th>
                         <th>Ngày đặt</th>
@@ -31,10 +32,20 @@
                 </thead>
                 <tbody>
                     <?php foreach ($orders as $order): ?>
-                    <tr>
-                        <td><?php echo $order->id; ?></td>
+                    <tr>                        <td><?php echo $order->id; ?></td>
                         <td><?php echo htmlspecialchars($order->name, ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo htmlspecialchars($order->phone, ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo number_format($order->subtotal ?? $order->total_amount, 0, ',', '.'); ?> đ</td>
+                        <td>
+                            <?php if (!empty($order->voucher_code) && $order->discount_amount > 0): ?>
+                                <span class="text-success">
+                                    <i class="bi bi-ticket-perforated"></i>
+                                    <?php echo number_format($order->discount_amount, 0, ',', '.'); ?> đ
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo number_format($order->total_amount, 0, ',', '.'); ?> đ</td>
                         <td><?php echo $order->item_count; ?></td>
                         <td><?php echo date('d/m/Y H:i', strtotime($order->created_at)); ?></td>

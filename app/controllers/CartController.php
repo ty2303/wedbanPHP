@@ -2,6 +2,7 @@
 require_once('app/config/database.php');
 require_once('app/models/ProductModel.php');
 require_once('app/models/OrderModel.php');
+require_once('app/models/VoucherModel.php');
 require_once('app/helpers/SessionHelper.php');
 require_once('app/middleware/AuthMiddleware.php');
 
@@ -10,12 +11,14 @@ class CartController
     private $db;
     private $productModel;
     private $orderModel;
+    private $voucherModel;
     
     public function __construct()
     {
         $this->db = (new Database())->getConnection();
         $this->productModel = new ProductModel($this->db);
         $this->orderModel = new OrderModel($this->db);
+        $this->voucherModel = new VoucherModel($this->db);
         
         // Initialize session if not started
         if (session_status() == PHP_SESSION_NONE) {
@@ -27,11 +30,19 @@ class CartController
             $_SESSION['cart'] = [];
         }
     }
-    
-    public function index()
+      public function index()
     {
         $cart_items = $this->getCartItems();
-        $total = $this->getCartTotal();
+        $subtotal = $this->getCartTotal();
+        $discount = 0;
+        $total = $subtotal;
+        
+        // Apply voucher discount if exists
+        if (isset($_SESSION['applied_voucher'])) {
+            $discount = $_SESSION['applied_voucher']['discount'];
+            $total = $subtotal - $discount;
+        }
+        
         include 'app/views/cart/index.php';
     }
     
@@ -118,11 +129,18 @@ class CartController
         $_SESSION['success'] = "Giỏ hàng đã được xóa!";
         header('Location: /webbanhang/Cart');
     }
-    
-    public function checkout()
+      public function checkout()
     {
         $cart_items = $this->getCartItems();
-        $total = $this->getCartTotal();
+        $subtotal = $this->getCartTotal();
+        $discount = 0;
+        $total = $subtotal;
+        
+        // Apply voucher discount if exists
+        if (isset($_SESSION['applied_voucher'])) {
+            $discount = $_SESSION['applied_voucher']['discount'];
+            $total = $subtotal - $discount;
+        }
         
         if (empty($cart_items)) {
             $_SESSION['error'] = "Giỏ hàng của bạn đang trống!";
@@ -182,19 +200,40 @@ class CartController
             header('Location: /webbanhang/Cart/checkout');
             return;
         }
-        
-        // Get user_id if logged in
+          // Get user_id if logged in
         $user_id = null;
         if (SessionHelper::isLoggedIn()) {
             $user_id = SessionHelper::getUserId();
         }
         
+        // Prepare voucher data if applied
+        $voucher_data = null;
+        if (isset($_SESSION['applied_voucher'])) {
+            $voucher_data = [
+                'voucher_id' => $_SESSION['applied_voucher']['id'],
+                'voucher_code' => $_SESSION['applied_voucher']['code'],
+                'discount_amount' => $_SESSION['voucher_discount']
+            ];
+        }
+        
         // Create the order
-        $order_id = $this->orderModel->createOrder($name, $email, $phone, $address, $cart_items, $user_id);
+        $order_id = $this->orderModel->createOrder($name, $email, $phone, $address, $cart_items, $user_id, $voucher_data);
         
         if ($order_id) {
-            // Clear the cart after successful order
+            // Record voucher usage if applied
+            if ($voucher_data) {
+                $this->voucherModel->recordVoucherUsage(
+                    $voucher_data['voucher_id'], 
+                    $order_id, 
+                    $user_id, 
+                    $voucher_data['discount_amount']
+                );
+            }
+            
+            // Clear the cart and voucher after successful order
             $_SESSION['cart'] = [];
+            unset($_SESSION['applied_voucher']);
+            unset($_SESSION['voucher_discount']);
             
             // Redirect to success page
             header('Location: /webbanhang/Cart/success/' . $order_id);
@@ -237,14 +276,13 @@ class CartController
     public function orderDetails($order_id)
     {
         $order = $this->orderModel->getOrderById($order_id);
-        
-        // Đảm bảo chỉ admin, staff hoặc chủ đơn hàng mới có thể xem chi tiết
+          // Đảm bảo chỉ admin, staff hoặc chủ đơn hàng mới có thể xem chi tiết
         if (!SessionHelper::isAdmin() && !SessionHelper::isStaff()) {
             // Đảm bảo người dùng đã đăng nhập
             AuthMiddleware::requireLogin();
             
             $user_id = SessionHelper::getUserId();
-            if ($order && $order['user_id'] != $user_id) {
+            if ($order && $order->user_id != $user_id) {
                 SessionHelper::setFlash('error', 'Bạn không có quyền xem đơn hàng này!');
                 header('Location: /webbanhang/Cart/orders');
                 return;
@@ -299,9 +337,69 @@ class CartController
         if (!empty($_SESSION['cart'])) {
             foreach ($_SESSION['cart'] as $quantity) {
                 $count += $quantity;
+            }        }
+        return $count;
+    }
+    
+    public function applyVoucher()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $code = strtoupper(trim($_POST['voucher_code'] ?? ''));
+            $cartTotal = $this->getCartTotal();
+            
+            // Get product IDs from cart
+            $productIds = [];
+            if (isset($_SESSION['cart'])) {
+                $productIds = array_keys($_SESSION['cart']);
+            }
+            
+            $result = $this->voucherModel->validateVoucher($code, $cartTotal, $productIds);
+            
+            if ($result['valid']) {
+                $discount = $this->voucherModel->calculateDiscount($result['voucher'], $cartTotal);
+                $_SESSION['applied_voucher'] = [
+                    'id' => $result['voucher']->id,
+                    'code' => $result['voucher']->code,
+                    'name' => $result['voucher']->name,
+                    'discount' => $discount
+                ];
+                
+                // Return JSON response for AJAX request
+                if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    echo json_encode([
+                        'success' => true, 
+                        'discount' => $discount, 
+                        'message' => 'Áp dụng voucher thành công!',
+                        'voucher_name' => $result['voucher']->name
+                    ]);
+                    exit;
+                }
+                
+                $_SESSION['success'] = 'Áp dụng voucher thành công!';
+            } else {
+                // Return JSON response for AJAX request
+                if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                    echo json_encode(['success' => false, 'message' => $result['message']]);
+                    exit;
+                }
+                
+                $_SESSION['error'] = $result['message'];
             }
         }
-        return $count;
+        
+        header('Location: /webbanhang/Cart');
+    }
+    
+    public function removeVoucher()
+    {
+        unset($_SESSION['applied_voucher']);
+        $_SESSION['success'] = 'Đã hủy voucher!';
+        
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
+        } else {
+            header('Location: /webbanhang/Cart');
+        }
     }
 }
 ?>

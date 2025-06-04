@@ -49,11 +49,19 @@
                         </li>
                         <?php endforeach; ?>
                     </ul>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
                         <span>Tạm tính</span>
-                        <span><?php echo number_format($total, 0, ',', '.'); ?> đ</span>
+                        <span><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</span>
                     </div>
+                    <?php if (isset($_SESSION['applied_voucher'])): ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-success">
+                            <i class="bi bi-ticket-perforated me-1"></i>
+                            Giảm giá (<?php echo htmlspecialchars($_SESSION['applied_voucher']['code']); ?>)
+                        </span>
+                        <span class="text-success">-<?php echo number_format($discount, 0, ',', '.'); ?> đ</span>
+                    </div>
+                    <?php endif; ?>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span>Phí vận chuyển</span>
                         <span class="text-success">Miễn phí</span>

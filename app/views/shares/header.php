@@ -114,13 +114,20 @@ if (!empty($_SESSION['cart'])) {
                                 </div>
                                 Thêm sản phẩm
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/webbanhang/Category/">
                                 <div class="icon-container">
                                     <i class="bi bi-folder2"></i>
                                 </div>
                                 Quản lý danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Voucher/">
+                                <div class="icon-container">
+                                    <i class="bi bi-ticket-perforated"></i>
+                                </div>
+                                Quản lý voucher
                             </a>
                         </li>
                         <li class="nav-item">

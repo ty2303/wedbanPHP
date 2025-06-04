@@ -71,16 +71,30 @@
                             <td class="text-center"><?php echo $item->quantity; ?></td>
                             <td class="text-end"><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</td>
                         </tr>
-                        <?php endforeach; ?>
-                    </tbody>
+                        <?php endforeach; ?>                    </tbody>
                     <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Tạm tính:</strong></td>
+                            <td class="text-end"><?php echo number_format($order->subtotal ?? $order_total, 0, ',', '.'); ?> đ</td>
+                        </tr>
+                        <?php if (!empty($order->voucher_code) && $order->discount_amount > 0): ?>
+                        <tr>
+                            <td colspan="3" class="text-end text-success">
+                                <strong>
+                                    <i class="bi bi-ticket-perforated me-1"></i>
+                                    Giảm giá (<?php echo htmlspecialchars($order->voucher_code); ?>):
+                                </strong>
+                            </td>
+                            <td class="text-end text-success">-<?php echo number_format($order->discount_amount, 0, ',', '.'); ?> đ</td>
+                        </tr>
+                        <?php endif; ?>
                         <tr>
                             <td colspan="3" class="text-end"><strong>Phí vận chuyển:</strong></td>
                             <td class="text-end">Miễn phí</td>
                         </tr>
                         <tr>
                             <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
-                            <td class="text-end"><strong><?php echo number_format($order_total, 0, ',', '.'); ?> đ</strong></td>
+                            <td class="text-end"><strong><?php echo number_format($order->total_amount, 0, ',', '.'); ?> đ</strong></td>
                         </tr>
                     </tfoot>
                 </table>

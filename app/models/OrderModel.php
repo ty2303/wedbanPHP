@@ -3,7 +3,7 @@ class OrderModel
 {
     private $conn;
     private $table_order = "orders";
-    private $table_order_details = "order_details";
+    private $table_order_details = "order_items";
     
     public function __construct($db)
     {
@@ -62,12 +62,11 @@ class OrderModel
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
-    
-    public function getOrderDetails($order_id)
+      public function getOrderDetails($order_id)
     {
         // Thay đổi từ INNER JOIN thành LEFT JOIN để lấy thông tin đơn hàng ngay cả khi sản phẩm đã bị xóa
         $query = "SELECT od.*, p.name, p.image FROM " . $this->table_order_details . " od
-                  LEFT JOIN product p ON od.product_id = p.id
+                  LEFT JOIN products p ON od.product_id = p.id
                   WHERE od.order_id = :order_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':order_id', $order_id);

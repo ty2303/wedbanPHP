@@ -1,0 +1,20 @@
+Array
+(
+    [file_info] => Array
+        (
+            [name] => z6528181456284_69a07ff6480feed1c0ffa8239601f752.jpg
+            [full_path] => z6528181456284_69a07ff6480feed1c0ffa8239601f752.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\Users\Admin\AppData\Local\Temp\php87E9.tmp
+            [error] => 0
+            [size] => 223019
+        )
+
+    [target_path] => C:/laragon/www/webbanhang/public/uploads/1749066843_z6528181456284_69a07ff6480feed1c0ffa8239601f752.jpg
+    [directory_exists] => 1
+    [directory_writable] => 1
+    [error_message] => 
+    [success] => 1
+    [file_exists] => 1
+    [file_size] => 223019
+)

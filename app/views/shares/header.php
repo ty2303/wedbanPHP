@@ -1,9 +1,24 @@
+<?php
+// Load SessionHelper if not already loaded
+if (!class_exists('SessionHelper')) {
+    require_once('app/helpers/SessionHelper.php');
+}
+SessionHelper::start();
+
+// Calculate cart count
+$cartCount = 0;
+if (!empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $quantity) {
+        $cartCount += $quantity;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> TITI Shop</title>
+    <title>TITI Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/webbanhang/public/css/purple-theme.css">
@@ -21,6 +36,19 @@
         /* Optional: Add shadow to navbar when scrolled */
         .navbar-shadow {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -62,19 +90,7 @@
                             Quản lý danh mục
                         </a>
                     </li>
-                    <?php
-                    // After initializing session if not already done
-                    if (session_status() == PHP_SESSION_NONE) {
-                        session_start();
-                    }
-                    // Calculate cart count
-                    $cartCount = 0;
-                    if (!empty($_SESSION['cart'])) {
-                        foreach ($_SESSION['cart'] as $quantity) {
-                            $cartCount += $quantity;
-                        }
-                    }
-                    ?>
+                    
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="/webbanhang/Cart">
                             <div class="icon-container">
@@ -97,18 +113,71 @@
                         </a>
                     </li>
                     <li class="nav-item">
-    <a class="nav-link" href="/webbanhang/Report">
-        <div class="icon-container">
-            <i class="bi bi-graph-up"></i>
-        </div>
-        Báo cáo
-    </a>
-</li>
+                        <a class="nav-link" href="/webbanhang/Report">
+                            <div class="icon-container">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            Báo cáo
+                        </a>
+                    </li>
+                    
+                    <?php if (SessionHelper::isLoggedIn()): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="d-flex align-items-center">
+                                    <?php 
+                                    $user = SessionHelper::getUser();
+                                    if (!empty($user['avatar'])): 
+                                    ?>
+                                        <img src="/webbanhang/public/uploads/<?php echo $user['avatar']; ?>" alt="Avatar" class="user-avatar">
+                                    <?php else: ?>
+                                        <i class="bi bi-person-circle me-1"></i>
+                                    <?php endif; ?>
+                                    <?php echo htmlspecialchars(SessionHelper::get('username')); ?>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="/webbanhang/Auth/profile"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/webbanhang/Auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Auth/login">
+                                <div class="icon-container">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                </div>
+                                Đăng nhập
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Auth/register">
+                                <div class="icon-container">
+                                    <i class="bi bi-person-plus"></i>
+                                </div>
+                                Đăng ký
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container mt-4">
+        <?php if (SessionHelper::hasFlash('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php echo SessionHelper::getFlash('success'); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (SessionHelper::hasFlash('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo SessionHelper::getFlash('error'); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
     
     <script>
         // Add shadow effect to navbar when scrolling

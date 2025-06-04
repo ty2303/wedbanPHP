@@ -2,7 +2,7 @@
 class CategoryModel
 {
     private $conn;
-    private $table_name = "category";
+    private $table_name = "categories";
     
     public function __construct($db)
     {

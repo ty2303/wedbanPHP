@@ -2,7 +2,7 @@
 class ProductModel
 {
     private $conn;
-    private $table_name = "product";
+    private $table_name = "products";
     
     public function __construct($db)
     {
@@ -13,7 +13,7 @@ class ProductModel
     {
         $query = "SELECT p.id, p.name, p.description, p.price, p.image, c.name as category_name
                   FROM " . $this->table_name . " p
-                  LEFT JOIN category c ON p.category_id = c.id";
+                  LEFT JOIN categories c ON p.category_id = c.id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -41,7 +41,7 @@ class ProductModel
         
         $query = "SELECT p.id, p.name, p.description, p.price, p.image, c.name as category_name
                   FROM " . $this->table_name . " p
-                  LEFT JOIN category c ON p.category_id = c.id
+                  LEFT JOIN categories c ON p.category_id = c.id
                   WHERE p.category_id = :category_id AND p.id != :product_id 
                   LIMIT :limit";
         
@@ -143,12 +143,11 @@ class ProductModel
         }
         return false;
     }
-    
-    public function getFilteredProducts($search = null, $minPrice = null, $maxPrice = null, $categories = [])
+      public function getFilteredProducts($search = null, $minPrice = null, $maxPrice = null, $categories = [])
     {
         $query = "SELECT p.id, p.name, p.description, p.price, p.image, c.name as category_name
                   FROM " . $this->table_name . " p
-                  LEFT JOIN category c ON p.category_id = c.id
+                  LEFT JOIN categories c ON p.category_id = c.id
                   WHERE 1=1";
         
         $params = [];

@@ -180,10 +180,21 @@ body {
 
 /* Footer styling */
 .footer-purple {
-    background: linear-gradient(to right, var(--purple-light), #f8f0ff);
-    color: var(--purple-primary);
-    padding: 15px 0;
+    background: linear-gradient(to right, var(--purple-primary), var(--purple-secondary));
+    color: white;
+    padding: 25px 0;
     margin-top: 40px;
+}
+
+.footer-purple a {
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.footer-purple a:hover {
+    color: var(--purple-light);
+    transform: scale(1.1);
+    display: inline-block;
 }
 
         .nav-link {
@@ -250,4 +261,125 @@ body {
 .badge.bg-warning {
     background-color: #ffc107 !important;
     color: #212529;
+}
+
+/* Authentication pages styling */
+.auth-container {
+    max-width: 500px;
+    width: 100%;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(138, 43, 226, 0.15);
+    transition: all 0.3s ease;
+}
+
+.auth-container:hover {
+    box-shadow: 0 5px 30px rgba(138, 43, 226, 0.25);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-logo {
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.auth-logo:hover img {
+    transform: scale(1.05);
+}
+
+.auth-container .form-control {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.auth-container .form-control:focus {
+    border-color: var(--purple-secondary);
+    box-shadow: 0 0 0 0.25rem rgba(138, 43, 226, 0.25);
+}
+
+.auth-container .btn-primary,
+.auth-container .btn-primary:hover {
+    background-color: var(--purple-primary);
+    border-color: var(--purple-primary);
+}
+
+.auth-container .input-group-text {
+    background-color: transparent;
+    border-right: none;
+    color: #6c757d;
+}
+
+.auth-container .input-group .form-control {
+    border-left: none;
+}
+
+.auth-container a {
+    color: var(--purple-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.auth-container a:hover {
+    color: var(--purple-hover);
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+}
+
+.success-message {
+    color: #28a745;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #d4edda;
+    border-radius: 4px;
+    border-left: 4px solid #28a745;
+}
+
+/* Profile page styling */
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #f1f1f1;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.2);
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--purple-primary);
+    background-color: transparent;
+    border-bottom: 2px solid var(--purple-primary);
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    border-color: transparent;
+    border-bottom: 2px solid rgba(138, 43, 226, 0.5);
+    color: var(--purple-hover);
 }

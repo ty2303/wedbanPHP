@@ -33,5 +33,41 @@ class AuthMiddleware
         }
         return true;
     }
+    
+    /**
+     * Kiểm tra nếu người dùng có quyền Admin
+     * 
+     * @param string $redirectTo Đường dẫn chuyển hướng nếu không có quyền
+     * @return bool True nếu có quyền Admin, nếu không sẽ chuyển hướng
+     */
+    public static function requireAdmin($redirectTo = '/webbanhang/')
+    {
+        self::requireLogin();
+        
+        if (!SessionHelper::isAdmin()) {
+            SessionHelper::setFlash('error', 'Bạn không có quyền truy cập trang này!');
+            header("Location: $redirectTo");
+            exit;
+        }
+        return true;
+    }
+    
+    /**
+     * Kiểm tra nếu người dùng có quyền Staff hoặc Admin
+     * 
+     * @param string $redirectTo Đường dẫn chuyển hướng nếu không có quyền
+     * @return bool True nếu có quyền Staff hoặc Admin, nếu không sẽ chuyển hướng
+     */
+    public static function requireStaff($redirectTo = '/webbanhang/')
+    {
+        self::requireLogin();
+        
+        if (!SessionHelper::isAdmin() && !SessionHelper::isStaff()) {
+            SessionHelper::setFlash('error', 'Bạn không có quyền truy cập trang này!');
+            header("Location: $redirectTo");
+            exit;
+        }
+        return true;
+    }
 }
 ?>

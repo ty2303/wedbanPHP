@@ -2,6 +2,8 @@
 require_once('app/config/database.php');
 require_once('app/models/ProductModel.php');
 require_once('app/models/CategoryModel.php');
+require_once('app/middleware/AuthMiddleware.php');
+require_once('app/helpers/SessionHelper.php');
 
 class ProductController
 {
@@ -51,12 +53,18 @@ class ProductController
     
     public function add()
     {
+        // Chỉ admin và staff mới có thể thêm sản phẩm
+        AuthMiddleware::requireStaff();
+        
         $categories = (new CategoryModel($this->db))->getCategories();
         include_once 'app/views/product/add.php';
     }
     
     public function save()
     {
+        // Chỉ admin và staff mới có thể thêm sản phẩm
+        AuthMiddleware::requireStaff();
+        
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
@@ -101,6 +109,9 @@ class ProductController
     
     public function edit($id)
     {
+        // Chỉ admin và staff mới có thể sửa sản phẩm
+        AuthMiddleware::requireStaff();
+        
         $product = $this->productModel->getProductById($id);
         $categories = (new CategoryModel($this->db))->getCategories();
         if ($product) {
@@ -112,6 +123,9 @@ class ProductController
     
     public function update()
     {
+        // Chỉ admin và staff mới có thể cập nhật sản phẩm
+        AuthMiddleware::requireStaff();
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];
             $name = $_POST['name'];
@@ -158,6 +172,9 @@ class ProductController
     
     public function delete($id)
     {
+        // Chỉ admin và staff mới có thể xóa sản phẩm
+        AuthMiddleware::requireStaff();
+        
         if ($this->productModel->deleteProduct($id)) {
             header('Location: /webbanhang/Product');
         } else {

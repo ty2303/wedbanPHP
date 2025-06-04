@@ -3,13 +3,18 @@ class UserModel
 {
     private $conn;
     private $table = 'users';
+    
+    // Định nghĩa các vai trò
+    const ROLE_ADMIN = 'admin';
+    const ROLE_STAFF = 'staff';
+    const ROLE_CUSTOMER = 'customer';
 
     public function __construct($db)
     {
         $this->conn = $db;
     }
 
-    public function register($username, $email, $password, $avatar = null, $age = null)
+    public function register($username, $email, $password, $avatar = null, $age = null, $role = self::ROLE_CUSTOMER)
     {
         // Validate input
         $errors = [];
@@ -49,10 +54,10 @@ class UserModel
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         // Insert user
-        $query = "INSERT INTO {$this->table} (username, email, password, avatar, age) VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO {$this->table} (username, email, password, avatar, age, role) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($query);
         
-        if ($stmt->execute([$username, $email, $hashed_password, $avatar, $age])) {
+        if ($stmt->execute([$username, $email, $hashed_password, $avatar, $age, $role])) {
             return true;
         }
         
@@ -128,6 +133,73 @@ class UserModel
         }
         
         return ["Đã xảy ra lỗi khi đổi mật khẩu"];
+    }
+
+    // Thêm phương thức kiểm tra vai trò của người dùng
+    public function getUserRole($userId)
+    {
+        $stmt = $this->conn->prepare("SELECT role FROM {$this->table} WHERE id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result ? $result['role'] : null;
+    }
+    
+    // Thêm phương thức thay đổi vai trò cho người dùng
+    public function changeUserRole($userId, $newRole)
+    {
+        if (!in_array($newRole, [self::ROLE_ADMIN, self::ROLE_STAFF, self::ROLE_CUSTOMER])) {
+            return false;
+        }
+        
+        $query = "UPDATE {$this->table} SET role = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$newRole, $userId]);
+    }
+      // Thêm phương thức lấy danh sách người dùng (dành cho Admin)
+    public function getAllUsers()
+    {
+        $stmt = $this->conn->prepare("SELECT id, username, email, role, status, avatar, age, created_at FROM {$this->table} ORDER BY id DESC");
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // Phương thức đếm số lượng người dùng đang chờ duyệt
+    public function getPendingUsersCount()
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM {$this->table} WHERE status = 'pending'");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result ? (int)$result['count'] : 0;
+    }
+      // Phương thức lấy danh sách người dùng đang chờ duyệt
+    public function getPendingUsers()
+    {
+        $stmt = $this->conn->prepare("SELECT id, username, email, role, status, avatar, age, created_at FROM {$this->table} WHERE status = 'pending' ORDER BY created_at ASC");
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // Phương thức phê duyệt người dùng
+    public function approveUser($userId)
+    {
+        $query = "UPDATE {$this->table} SET status = 'approved' WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$userId]);
+    }
+    
+    // Phương thức từ chối người dùng
+    public function rejectUser($userId)
+    {
+        $query = "UPDATE {$this->table} SET status = 'rejected' WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$userId]);
     }
 }
 ?>

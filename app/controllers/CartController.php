@@ -2,6 +2,8 @@
 require_once('app/config/database.php');
 require_once('app/models/ProductModel.php');
 require_once('app/models/OrderModel.php');
+require_once('app/helpers/SessionHelper.php');
+require_once('app/middleware/AuthMiddleware.php');
 
 class CartController
 {
@@ -146,6 +148,7 @@ class CartController
         }
         
         $name = $_POST['name'] ?? '';
+        $email = $_POST['email'] ?? '';
         $phone = $_POST['phone'] ?? '';
         $address = $_POST['address'] ?? '';
         
@@ -153,6 +156,11 @@ class CartController
         $errors = [];
         if (empty($name)) {
             $errors[] = "Vui lòng nhập họ tên!";
+        }
+        if (empty($email)) {
+            $errors[] = "Vui lòng nhập email!";
+        } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Email không hợp lệ!";
         }
         if (empty($phone)) {
             $errors[] = "Vui lòng nhập số điện thoại!";
@@ -167,6 +175,7 @@ class CartController
             $_SESSION['checkout_errors'] = $errors;
             $_SESSION['checkout_data'] = [
                 'name' => $name,
+                'email' => $email,
                 'phone' => $phone,
                 'address' => $address
             ];
@@ -174,8 +183,14 @@ class CartController
             return;
         }
         
+        // Get user_id if logged in
+        $user_id = null;
+        if (SessionHelper::isLoggedIn()) {
+            $user_id = SessionHelper::getUserId();
+        }
+        
         // Create the order
-        $order_id = $this->orderModel->createOrder($name, $phone, $address, $cart_items);
+        $order_id = $this->orderModel->createOrder($name, $email, $phone, $address, $cart_items, $user_id);
         
         if ($order_id) {
             // Clear the cart after successful order
@@ -204,13 +219,38 @@ class CartController
     
     public function orders()
     {
-        $orders = $this->orderModel->getOrders();
+        // Chỉ admin và staff mới có thể xem tất cả đơn hàng
+        // Khách hàng chỉ có thể xem đơn hàng của mình
+        
+        if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
+            $orders = $this->orderModel->getOrders();
+        } else {
+            // Đảm bảo người dùng đã đăng nhập
+            AuthMiddleware::requireLogin();
+            $user_id = SessionHelper::getUserId();
+            $orders = $this->orderModel->getUserOrders($user_id);
+        }
+        
         include 'app/views/cart/orders.php';
     }
     
     public function orderDetails($order_id)
     {
         $order = $this->orderModel->getOrderById($order_id);
+        
+        // Đảm bảo chỉ admin, staff hoặc chủ đơn hàng mới có thể xem chi tiết
+        if (!SessionHelper::isAdmin() && !SessionHelper::isStaff()) {
+            // Đảm bảo người dùng đã đăng nhập
+            AuthMiddleware::requireLogin();
+            
+            $user_id = SessionHelper::getUserId();
+            if ($order && $order['user_id'] != $user_id) {
+                SessionHelper::setFlash('error', 'Bạn không có quyền xem đơn hàng này!');
+                header('Location: /webbanhang/Cart/orders');
+                return;
+            }
+        }
+        
         $order_details = $this->orderModel->getOrderDetails($order_id);
         
         if (!$order || !$order_details) {

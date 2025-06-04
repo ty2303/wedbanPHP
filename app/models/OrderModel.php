@@ -10,23 +10,33 @@ class OrderModel
         $this->conn = $db;
     }
     
-    public function createOrder($name, $phone, $address, $cart_items)
+    public function createOrder($name, $email, $phone, $address, $cart_items, $user_id = null)
     {
         try {
             $this->conn->beginTransaction();
             
             // First, create the order
-            $query = "INSERT INTO " . $this->table_order . " (name, phone, address) 
-                      VALUES (:name, :phone, :address)";
+            $query = "INSERT INTO " . $this->table_order . " (user_id, name, email, phone, address, total_amount) 
+                      VALUES (:user_id, :name, :email, :phone, :address, :total_amount)";
             $stmt = $this->conn->prepare($query);
             
             $name = htmlspecialchars(strip_tags($name));
+            $email = htmlspecialchars(strip_tags($email));
             $phone = htmlspecialchars(strip_tags($phone));
             $address = htmlspecialchars(strip_tags($address));
             
+            // Calculate total amount
+            $total_amount = 0;
+            foreach ($cart_items as $item) {
+                $total_amount += $item['product']->price * $item['quantity'];
+            }
+            
+            $stmt->bindParam(':user_id', $user_id);
             $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':email', $email);
             $stmt->bindParam(':phone', $phone);
             $stmt->bindParam(':address', $address);
+            $stmt->bindParam(':total_amount', $total_amount);
             
             $stmt->execute();
             $order_id = $this->conn->lastInsertId();
@@ -84,6 +94,18 @@ class OrderModel
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+    /**
+     * Lấy danh sách đơn hàng của một người dùng cụ thể
+     */
+    public function getUserOrders($user_id)
+    {
+        $query = "SELECT * FROM " . $this->table_order . " WHERE user_id = :user_id ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>

@@ -47,6 +47,7 @@ class SessionHelper
     {
         self::set('user_id', $user['id']);
         self::set('username', $user['username']);
+        self::set('user_role', $user['role'] ?? 'customer');
         self::set('user_data', $user);
     }
 
@@ -59,11 +60,32 @@ class SessionHelper
     {
         return self::get('user_id');
     }
+    
+    public static function getUserRole()
+    {
+        return self::get('user_role', 'customer');
+    }
+    
+    public static function isAdmin()
+    {
+        return self::getUserRole() === 'admin';
+    }
+    
+    public static function isStaff()
+    {
+        return self::getUserRole() === 'staff';
+    }
+    
+    public static function isCustomer()
+    {
+        return self::getUserRole() === 'customer';
+    }
 
     public static function logout()
     {
         self::delete('user_id');
         self::delete('username');
+        self::delete('user_role');
         self::delete('user_data');
     }
 

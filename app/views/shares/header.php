@@ -3,6 +3,14 @@
 if (!class_exists('SessionHelper')) {
     require_once('app/helpers/SessionHelper.php');
 }
+// Load Database if not already loaded
+if (!class_exists('Database')) {
+    require_once('app/config/database.php');
+}
+// Load UserModel if not already loaded
+if (!class_exists('UserModel')) {
+    require_once('app/models/UserModel.php');
+}
 SessionHelper::start();
 
 // Calculate cart count
@@ -64,8 +72,8 @@ if (!empty($_SESSION['cart'])) {
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+            <div class="collapse navbar-collapse" id="navbarNav">                <ul class="navbar-nav ms-auto">
+                    <!-- Menu dành cho tất cả người dùng -->
                     <li class="nav-item">
                         <a class="nav-link" href="/webbanhang/Product/">
                             <div class="icon-container">
@@ -74,23 +82,8 @@ if (!empty($_SESSION['cart'])) {
                             Danh sách sản phẩm
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/webbanhang/Product/add">
-                            <div class="icon-container">
-                                <i class="bi bi-bag-plus"></i>
-                            </div>
-                            Thêm sản phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/webbanhang/Category/">
-                            <div class="icon-container">
-                                <i class="bi bi-folder2"></i>
-                            </div>
-                            Quản lý danh mục
-                        </a>
-                    </li>
                     
+                    <!-- Menu dành cho Khách hàng -->
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="/webbanhang/Cart">
                             <div class="icon-container">
@@ -102,8 +95,7 @@ if (!empty($_SESSION['cart'])) {
                                 <?php endif; ?>
                             </div>
                             Giỏ hàng
-                        </a>
-                    </li>
+                        </a>                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/webbanhang/Cart/orders">
                             <div class="icon-container">
@@ -112,14 +104,56 @@ if (!empty($_SESSION['cart'])) {
                             Đơn hàng
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/webbanhang/Report">
-                            <div class="icon-container">
-                                <i class="bi bi-graph-up"></i>
-                            </div>
-                            Báo cáo
-                        </a>
-                    </li>
+                    
+                    <!-- Menu dành cho Admin và Staff -->
+                    <?php if (SessionHelper::isAdmin() || SessionHelper::isStaff()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Product/add">
+                                <div class="icon-container">
+                                    <i class="bi bi-bag-plus"></i>
+                                </div>
+                                Thêm sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Category/">
+                                <div class="icon-container">
+                                    <i class="bi bi-folder2"></i>
+                                </div>
+                                Quản lý danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Report">
+                                <div class="icon-container">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                Báo cáo
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                    
+                    <!-- Menu chỉ dành cho Admin -->
+                    <?php if (SessionHelper::isAdmin()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="/webbanhang/User">
+                                <div class="icon-container">
+                                    <i class="bi bi-people"></i>
+                                    <?php
+                                    // Khởi tạo UserModel và lấy số lượng người dùng đang chờ duyệt
+                                    $userModel = new UserModel((new Database())->getConnection());
+                                    $pendingCount = $userModel->getPendingUsersCount();
+                                    if ($pendingCount > 0):
+                                    ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        <?php echo $pendingCount; ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                                Quản lý người dùng
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     
                     <?php if (SessionHelper::isLoggedIn()): ?>
                         <li class="nav-item dropdown">

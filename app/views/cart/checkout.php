@@ -1,4 +1,3 @@
-
 <?php include 'app/views/shares/header.php'; ?>
 
 <div class="container py-4">
@@ -79,6 +78,13 @@
                             <input type="text" class="form-control" id="name" name="name" 
                                    value="<?php echo isset($_SESSION['checkout_data']['name']) ? $_SESSION['checkout_data']['name'] : ''; ?>" required>
                             <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="<?php echo isset($_SESSION['checkout_data']['email']) ? $_SESSION['checkout_data']['email'] : ''; ?>" required>
+                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
                         </div>
                         
                         <div class="mb-3">

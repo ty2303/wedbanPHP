@@ -2,6 +2,8 @@
 require_once('app/config/database.php');
 require_once('app/models/ReportModel.php');
 require_once('app/models/OrderModel.php');
+require_once('app/middleware/AuthMiddleware.php');
+require_once('app/helpers/SessionHelper.php');
 
 class ReportController
 {
@@ -21,6 +23,9 @@ class ReportController
     
     public function index()
     {
+        // Chỉ Admin và Staff mới có thể truy cập báo cáo
+        AuthMiddleware::requireStaff();
+        
         // Default to current month report
         $currentYear = date('Y');
         $currentMonth = date('m');
@@ -37,6 +42,9 @@ class ReportController
     
     public function revenue()
     {
+        // Chỉ Admin và Staff mới có thể truy cập báo cáo doanh thu
+        AuthMiddleware::requireStaff();
+        
         $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
         $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-t');
         $year = isset($_GET['year']) ? $_GET['year'] : date('Y');
@@ -50,6 +58,9 @@ class ReportController
     
     public function exportExcel()
     {
+        // Chỉ Admin và Staff mới có thể xuất báo cáo Excel
+        AuthMiddleware::requireStaff();
+        
         $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
         $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-t');
         

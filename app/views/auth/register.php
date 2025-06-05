@@ -80,14 +80,24 @@ SessionHelper::start();
                         value="<?php echo isset($_POST['age']) ? htmlspecialchars($_POST['age']) : ''; ?>">
                 </div>
             </div>
-            
-            <div class="form-group">
+              <div class="form-group">
                 <label for="avatar" class="form-label">Ảnh đại diện</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-image"></i></span>
                     <input type="file" id="avatar" name="avatar" class="form-control">
                 </div>
                 <small class="form-text text-muted">Chấp nhận file JPG, JPEG, PNG, GIF.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="role" class="form-label">Vai trò</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                    <select id="role" name="role" class="form-control" required>
+                        <option value="customer">Khách hàng</option>
+                        <option value="staff">Nhân viên</option>
+                    </select>
+                </div>
             </div>
             
             <div class="form-group">

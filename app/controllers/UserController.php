@@ -102,4 +102,93 @@ class UserController
         
         include 'app/views/user/pending.php';
     }
+    
+    // Phương thức tạm khóa tài khoản
+    public function suspend($id = null)
+    {
+        // Chỉ admin mới có thể truy cập
+        AuthMiddleware::requireAdmin();
+        
+        if (!$id) {
+            SessionHelper::setFlash('error', 'ID người dùng không hợp lệ!');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+        
+        $user = $this->userModel->getUserById($id);
+        
+        if (!$user) {
+            SessionHelper::setFlash('error', 'Không tìm thấy người dùng!');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+        
+        // Ngăn không cho khóa tài khoản admin
+        if ($user['role'] == 'admin') {
+            SessionHelper::setFlash('error', 'Không thể tạm khóa tài khoản admin');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+
+        if ($this->userModel->suspendUser($id)) {
+            SessionHelper::setFlash('success', 'Đã tạm khóa tài khoản thành công!');
+        } else {
+            SessionHelper::setFlash('error', 'Không thể tạm khóa tài khoản này!');
+        }
+        
+        header('Location: /webbanhang/User');
+        exit;
+    }
+    
+    // Phương thức xóa tài khoản
+    public function delete($id = null)
+    {
+        // Chỉ admin mới có thể truy cập
+        AuthMiddleware::requireAdmin();
+        
+        if (!$id) {
+            SessionHelper::setFlash('error', 'ID người dùng không hợp lệ!');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+        
+        if ($this->userModel->deleteUser($id)) {
+            SessionHelper::setFlash('success', 'Đã xóa tài khoản thành công!');
+        } else {
+            SessionHelper::setFlash('error', 'Không thể xóa tài khoản này! (Có thể là tài khoản admin)');
+        }
+        
+        header('Location: /webbanhang/User');
+        exit;
+    }
+    
+    // Phương thức mở khóa tài khoản
+    public function unsuspend($id = null)
+    {
+        // Chỉ admin mới có thể truy cập
+        AuthMiddleware::requireAdmin();
+        
+        if (!$id) {
+            SessionHelper::setFlash('error', 'ID người dùng không hợp lệ!');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+        
+        $user = $this->userModel->getUserById($id);
+        
+        if (!$user) {
+            SessionHelper::setFlash('error', 'Không tìm thấy người dùng!');
+            header('Location: /webbanhang/User');
+            exit;
+        }
+
+        if ($this->userModel->unsuspendUser($id)) {
+            SessionHelper::setFlash('success', 'Đã mở khóa tài khoản thành công!');
+        } else {
+            SessionHelper::setFlash('error', 'Không thể mở khóa tài khoản này!');
+        }
+        
+        header('Location: /webbanhang/User');
+        exit;
+    }
 }

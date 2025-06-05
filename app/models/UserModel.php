@@ -4,6 +4,9 @@ class UserModel
     private $conn;
     private $table = 'users';
     
+    private static $apiKey = 're_Y6Dk3sdy_FsSdW6Vsv334mhCNm1MkG1fG';
+    private static $apiUrl = 'https://api.resend.com/emails';
+    
     // Định nghĩa các vai trò
     const ROLE_ADMIN = 'admin';
     const ROLE_STAFF = 'staff';
@@ -12,9 +15,7 @@ class UserModel
     public function __construct($db)
     {
         $this->conn = $db;
-    }
-
-    public function register($username, $email, $password, $avatar = null, $age = null, $role = self::ROLE_CUSTOMER)
+    }    public function register($username, $email, $password, $avatar = null, $age = null, $role = self::ROLE_CUSTOMER, $status = 'approved')
     {
         // Validate input
         $errors = [];
@@ -48,23 +49,23 @@ class UserModel
         $stmt->execute([$email]);
         if ($stmt->rowCount() > 0) {
             return ["Email đã tồn tại"];
-        }
-
-        // Hash password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
+        }        // Hash password
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);        
         // Insert user
-        $query = "INSERT INTO {$this->table} (username, email, password, avatar, age, role) VALUES (?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO {$this->table} (username, email, password, avatar, age, role, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($query);
         
-        if ($stmt->execute([$username, $email, $hashed_password, $avatar, $age, $role])) {
+        if ($stmt->execute([$username, $email, $hashed_password, $avatar, $age, $role, $status])) {
+            $userId = $this->conn->lastInsertId();
+            // Gửi email xác thực
+            if($this->sendVerificationEmail($userId, $email, $username)) {
+                return $userId;
+            }
             return true;
         }
         
         return ["Đã xảy ra lỗi khi đăng ký"];
-    }
-
-    public function login($username, $password)
+    }    public function login($username, $password)
     {
         if (empty($username) || empty($password)) {
             return ["Tên đăng nhập và mật khẩu không được để trống"];
@@ -72,9 +73,17 @@ class UserModel
 
         $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE username = ? LIMIT 1");
         $stmt->execute([$username]);
-        
-        if ($stmt->rowCount() > 0) {
+          if ($stmt->rowCount() > 0) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user['status'] === 'pending') {
+                return ["Tài khoản của bạn đang chờ được phê duyệt"];
+            }
+            if ($user['status'] === 'rejected') {
+                return ["Tài khoản của bạn đã bị từ chối"];
+            }
+            if ($user['status'] === 'suspended') {
+                return ["Tài khoản của bạn đã bị tạm khóa. Vui lòng liên hệ admin để được hỗ trợ."];
+            }
             if (password_verify($password, $user['password'])) {
                 // Remove password from array
                 unset($user['password']);
@@ -191,15 +200,192 @@ class UserModel
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([$userId]);
-    }
-    
-    // Phương thức từ chối người dùng
+    }    
     public function rejectUser($userId)
     {
         $query = "UPDATE {$this->table} SET status = 'rejected' WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([$userId]);
+    }
+
+    // Phương thức tạm khóa tài khoản
+    public function suspendUser($userId)
+    {
+        $query = "UPDATE {$this->table} SET status = 'suspended' WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$userId]);
+    }
+
+    // Phương thức mở khóa tài khoản
+    public function unsuspendUser($userId)
+    {
+        $query = "UPDATE {$this->table} SET status = 'approved' WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$userId]);
+    }
+
+    // Phương thức xóa tài khoản
+    public function deleteUser($userId)
+    {
+        // Kiểm tra xem có phải admin không
+        $stmt = $this->conn->prepare("SELECT role FROM {$this->table} WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user && $user['role'] === self::ROLE_ADMIN) {
+            return false; // Không cho phép xóa tài khoản admin
+        }
+
+        $query = "DELETE FROM {$this->table} WHERE id = ? AND role != ?";
+        $stmt = $this->conn->prepare($query);
+        
+        return $stmt->execute([$userId, self::ROLE_ADMIN]);
+    }
+
+    // Phương thức gửi email xác thực
+    public function sendVerificationEmail($userId, $email, $username)
+    {
+        try {
+            // Tạo mã xác thực
+            $verificationCode = bin2hex(random_bytes(16));
+            
+            // Lưu mã xác thực vào database
+            $query = "UPDATE {$this->table} SET verification_code = ?, email_verified = 0 WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$verificationCode, $userId]);
+
+            // URL xác thực
+            $verificationUrl = "http://" . $_SERVER['HTTP_HOST'] . "/verify-email?code=" . $verificationCode;
+
+            // Nội dung email
+            $emailContent = "
+                <h2>Xin chào {$username}!</h2>
+                <p>Cảm ơn bạn đã đăng ký tài khoản. Vui lòng click vào link bên dưới để xác thực email của bạn:</p>
+                <p><a href='{$verificationUrl}'>Xác thực email</a></p>
+                <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+            ";
+
+            // Chuẩn bị dữ liệu gửi đi
+            $data = [
+                'from' => 'Webbanhang <onboarding@resend.dev>',
+                'to' => [$email],
+                'subject' => 'Xác thực email của bạn',
+                'html' => $emailContent
+            ];
+
+            // Khởi tạo CURL
+            $ch = curl_init(self::$apiUrl);
+            
+            // Cấu hình CURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . self::$apiKey,
+                'Content-Type: application/json'
+            ]);
+            
+            // Thực hiện gửi request
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            
+            // Đóng kết nối CURL
+            curl_close($ch);
+
+            // Log kết quả để debug
+            error_log("Email sending attempt to: " . $email);
+            error_log("HTTP Code: " . $httpCode);
+            error_log("Response: " . $response);
+            if ($error) {
+                error_log("Curl Error: " . $error);
+            }
+
+            // Kiểm tra kết quả
+            $result = json_decode($response, true);
+            return isset($result['id']);
+            
+        } catch (Exception $e) {
+            error_log("Email sending error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Phương thức xác thực email
+    public function verifyEmail($verificationCode)
+    {
+        // Kiểm tra mã xác thực
+        $stmt = $this->conn->prepare("SELECT id FROM {$this->table} WHERE verification_code = ? LIMIT 1");
+        $stmt->execute([$verificationCode]);
+        
+        if ($stmt->rowCount() > 0) {
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Cập nhật trạng thái xác thực
+            $query = "UPDATE {$this->table} SET email_verified = 1, verification_code = NULL WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            
+            return $stmt->execute([$user['id']]);
+        }
+        
+        return false;
+    }
+
+    public function createPasswordResetToken($email)
+    {
+        // Kiểm tra email tồn tại
+        $query = "SELECT id FROM {$this->table} WHERE email = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$email]);
+        
+        if (!$stmt->fetch()) {
+            return false;
+        }
+
+        // Tạo token ngẫu nhiên
+        $token = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        
+        // Lưu token vào database
+        $query = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE token = ?, expires_at = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        if ($stmt->execute([$email, $token, $expires, $token, $expires])) {
+            return $token;
+        }
+        return false;
+    }
+
+    public function verifyPasswordResetToken($token)
+    {
+        $query = "SELECT email FROM password_resets 
+                 WHERE token = ? AND expires_at > NOW() AND used = 0";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$token]);
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function resetPassword($email, $newPassword)
+    {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        // Cập nhật mật khẩu mới
+        $query = "UPDATE {$this->table} SET password = ? WHERE email = ?";
+        $stmt = $this->conn->prepare($query);
+        
+        if ($stmt->execute([$hashedPassword, $email])) {
+            // Đánh dấu token đã sử dụng
+            $query = "UPDATE password_resets SET used = 1 WHERE email = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$email]);
+            return true;
+        }
+        return false;
     }
 }
 ?>

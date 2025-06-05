@@ -55,13 +55,13 @@ SessionHelper::start();
                     <input type="password" id="password" name="password" class="form-control" required>
                 </div>
             </div>
-            
-            <div class="form-group">
+              <div class="form-group">
                 <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
             </div>
             
             <div class="text-center mt-4">
                 <p>Chưa có tài khoản? <a href="/webbanhang/Auth/register">Đăng ký ngay</a></p>
+                <p><a href="/webbanhang/Auth/forgotPassword">Quên mật khẩu?</a></p>
                 <p><a href="/webbanhang/"><i class="bi bi-house-door"></i> Quay lại trang chủ</a></p>
             </div>
         </form>

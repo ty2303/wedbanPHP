@@ -74,19 +74,39 @@
                                             <span class="badge bg-warning">Nhân viên</span>
                                         <?php else: ?>                                            <span class="badge bg-info">Khách hàng</span>
                                         <?php endif; ?>
-                                    </td>
-                                    <td>
+                                    </td>                                    <td>
                                         <?php if ($user['status'] == 'pending'): ?>
                                             <span class="badge bg-warning">Chờ duyệt</span>
                                         <?php elseif ($user['status'] == 'approved'): ?>
                                             <span class="badge bg-success">Đã duyệt</span>
+                                        <?php elseif ($user['status'] == 'suspended'): ?>
+                                            <span class="badge bg-secondary">Tạm khóa</span>
                                         <?php else: ?>
                                             <span class="badge bg-danger">Từ chối</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
-                                    <td>
+                                    <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>                                    <td>
                                         <a href="/webbanhang/User/edit/<?= $user['id'] ?>" class="btn btn-sm btn-primary">Sửa</a>
+                                        <?php if ($user['role'] !== 'admin'): ?>
+                                            <?php if ($user['status'] === 'suspended'): ?>
+                                                <a href="/webbanhang/User/unsuspend/<?= $user['id'] ?>" 
+                                                   class="btn btn-sm btn-success"
+                                                   onclick="return confirm('Bạn có chắc muốn mở khóa tài khoản này?')">
+                                                    Mở khóa
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="/webbanhang/User/suspend/<?= $user['id'] ?>" 
+                                                   class="btn btn-sm btn-warning"
+                                                   onclick="return confirm('Bạn có chắc muốn tạm khóa tài khoản này?')">
+                                                    Khóa
+                                                </a>
+                                            <?php endif; ?>
+                                            <a href="/webbanhang/User/delete/<?= $user['id'] ?>" 
+                                               class="btn btn-sm btn-danger"
+                                               onclick="return confirm('Bạn có chắc muốn xóa tài khoản này? Hành động này không thể hoàn tác!')">
+                                                Xóa
+                                            </a>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

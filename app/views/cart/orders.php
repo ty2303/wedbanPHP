@@ -17,14 +17,14 @@
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table purple-table">
-                <thead>
+            <table class="table purple-table">                <thead>
                     <tr>                        <th>ID</th>
                         <th>Khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Tạm tính</th>
                         <th>Giảm giá</th>
                         <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
                         <th>Số sản phẩm</th>
                         <th>Ngày đặt</th>
                         <th>Hành động</th>
@@ -45,8 +45,16 @@
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
+                        </td>                        <td><?php echo number_format($order->total_amount, 0, ',', '.'); ?> đ</td>
+                        <td>
+                            <?php if (isset($order->status)): ?>
+                                <span class="badge bg-<?php echo OrderModel::$statusColors[$order->status]; ?>">
+                                    <?php echo OrderModel::$statusLabels[$order->status]; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="badge bg-warning">Chờ xử lý</span>
+                            <?php endif; ?>
                         </td>
-                        <td><?php echo number_format($order->total_amount, 0, ',', '.'); ?> đ</td>
                         <td><?php echo $order->item_count; ?></td>
                         <td><?php echo date('d/m/Y H:i', strtotime($order->created_at)); ?></td>
                         <td>

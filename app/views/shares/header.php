@@ -82,8 +82,8 @@ if (!empty($_SESSION['cart'])) {
                             Danh sách sản phẩm
                         </a>
                     </li>
-                    
-                    <!-- Menu dành cho Khách hàng -->
+                      <!-- Menu dành cho Khách hàng ONLY (không hiển thị với Admin/Staff) -->
+                    <?php if (!SessionHelper::isAdmin() && !SessionHelper::isStaff()): ?>
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="/webbanhang/Cart">
                             <div class="icon-container">
@@ -104,6 +104,7 @@ if (!empty($_SESSION['cart'])) {
                             Đơn hàng
                         </a>
                     </li>
+                    <?php endif; ?>
                     
                     <!-- Menu dành cho Admin và Staff -->
                     <?php if (SessionHelper::isAdmin() || SessionHelper::isStaff()): ?>
@@ -121,13 +122,20 @@ if (!empty($_SESSION['cart'])) {
                                 </div>
                                 Quản lý danh mục
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li>                        <li class="nav-item">
                             <a class="nav-link" href="/webbanhang/Voucher/">
                                 <div class="icon-container">
                                     <i class="bi bi-ticket-perforated"></i>
                                 </div>
                                 Quản lý voucher
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/webbanhang/Cart/ordersByStatus">
+                                <div class="icon-container">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
+                                Quản lý đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">

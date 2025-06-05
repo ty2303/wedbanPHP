@@ -17,7 +17,7 @@
 session_start();
 
 // Cấu hình
-$setup_file = __DIR__ . '/database/complete_setup.sql';
+$setup_file = __DIR__ . '/database/master_setup.sql';
 $config_file = __DIR__ . '/app/config/database.php';
 
 // Kiểm tra setup đã hoàn thành chưa
@@ -215,9 +215,7 @@ class Database
                             <strong>Password:</strong> admin123
                         </div>
                     </div>
-                </div>
-
-                <div class="feature-list">
+                </div>                <div class="feature-list">
                     <h5><i class="bi bi-list-check"></i> Tính năng đã cài đặt:</h5>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
@@ -229,11 +227,19 @@ class Database
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
-                        <span>Hệ thống giỏ hàng và đặt hàng</span>
+                        <span>Hệ thống giỏ hàng và đặt hàng với UI đã nâng cấp</span>
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
-                        <span>Báo cáo doanh thu</span>
+                        <span>Hệ thống voucher/mã giảm giá hoàn chỉnh</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span>Quản lý trạng thái đơn hàng chi tiết</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span>Báo cáo doanh thu và thống kê</span>
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
@@ -241,7 +247,41 @@ class Database
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
-                        <span>Dữ liệu mẫu: 20+ sản phẩm công nghệ</span>
+                        <span>Dữ liệu mẫu: 23 sản phẩm công nghệ + 5 vouchers</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span>Phân quyền hiển thị nút theo vai trò người dùng</span>
+                    </div>
+                </div>
+
+                <div class="feature-list">
+                    <h5><i class="bi bi-gift"></i> Vouchers có sẵn:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="feature-item">
+                                <i class="bi bi-tag"></i>
+                                <span><strong>WELCOME10</strong> - Giảm 10%</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-tag"></i>
+                                <span><strong>FREESHIP</strong> - Giảm 30k ship</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-tag"></i>
+                                <span><strong>SUMMER20</strong> - Giảm 20%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-item">
+                                <i class="bi bi-tag"></i>
+                                <span><strong>NEWUSER50</strong> - Giảm 50k</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-tag"></i>
+                                <span><strong>VIP15</strong> - Giảm 15% VIP</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -317,9 +357,7 @@ class Database
                     <div class="step active">1</div>
                     <div class="step pending">2</div>
                     <div class="step pending">3</div>
-                </div>
-
-                <div class="feature-list">
+                </div>                <div class="feature-list">
                     <h5><i class="bi bi-info-circle"></i> Hệ thống sẽ cài đặt:</h5>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
@@ -327,7 +365,7 @@ class Database
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
-                        <span><strong>Hệ thống vai trò</strong> - Admin, Staff, Customer</span>
+                        <span><strong>Hệ thống vai trò</strong> - Admin, Staff, Customer với phân quyền UI</span>
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
@@ -335,7 +373,19 @@ class Database
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>
-                        <span><strong>Dữ liệu mẫu</strong> - 20+ sản phẩm công nghệ</span>
+                        <span><strong>Dữ liệu mẫu</strong> - 23 sản phẩm + 5 vouchers + đơn hàng test</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span><strong>UI nâng cấp</strong> - Gradient design, hover effects, responsive</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span><strong>Voucher system</strong> - Mã giảm giá với nhiều loại chiết khấu</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-check"></i>
+                        <span><strong>Order management</strong> - Theo dõi trạng thái chi tiết</span>
                     </div>
                     <div class="feature-item">
                         <i class="bi bi-check"></i>

@@ -97,6 +97,19 @@ body {
     margin-bottom: 8px;
 }
 
+/* Status Form Improvements */
+.form-label {
+    font-weight: 600;
+    color: var(--purple-primary);
+    margin-bottom: 8px;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: var(--purple-secondary);
+    box-shadow: 0 0 0 0.2rem var(--purple-focus);
+}
+
 /* Table styling */
 .purple-table {
     border-radius: 8px;
@@ -382,4 +395,162 @@ body {
     border-color: transparent;
     border-bottom: 2px solid rgba(138, 43, 226, 0.5);
     color: var(--purple-hover);
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+}
+
+.timeline-item.current .timeline-marker {
+    box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.2);
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #dee2e6;
+}
+
+.timeline-item.current .timeline-content {
+    background: rgba(138, 43, 226, 0.05);
+    border-left-color: var(--purple-primary);
+}
+
+/* Order Status Styles */
+.status-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.status-badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+/* Status Selection Styles */
+.status-option {
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+.status-option.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-option.status-confirmed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-option.status-processing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-option.status-packed {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.status-option.status-shipped {
+    background-color: #d3d3d4;
+    color: #383d41;
+}
+
+.status-option.status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-option.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-option.status-returned {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsive Order Management */
+@media (max-width: 768px) {
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline:before {
+        left: 10px;
+    }
+    
+    .timeline-marker {
+        left: -17px;
+    }
+}
+
+/* Order Status Dashboard */
+.order-stats-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.order-stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.status-count {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.status-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }

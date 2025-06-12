@@ -332,36 +332,72 @@ class UserModel
         }
         
         return false;
-    }
-
-    public function createPasswordResetToken($email)
+    }    public function createPasswordResetToken($email)
     {
+        error_log("Creating password reset token for email: " . $email);
+        
         // Kiểm tra email tồn tại
         $query = "SELECT id FROM {$this->table} WHERE email = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$email]);
         
         if (!$stmt->fetch()) {
+            error_log("Email not found in users table: " . $email);
             return false;
-        }
-
-        // Tạo token ngẫu nhiên
-        $token = bin2hex(random_bytes(32));
-        $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        }        // Tạo mã xác nhận 6 số
+        $token = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expires = date('Y-m-d H:i:s', strtotime('+30 minutes'));
         
-        // Lưu token vào database
-        $query = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE token = ?, expires_at = ?";
+        error_log("Generated verification code: " . $token);
+        error_log("Code expires at: " . $expires);
+        
+        // Xóa token cũ nếu có
+        $query = "DELETE FROM password_resets WHERE email = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$email]);
+          // Lưu token vào database
+        $query = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)";
         $stmt = $this->conn->prepare($query);
         
-        if ($stmt->execute([$email, $token, $expires, $token, $expires])) {
+        if ($stmt->execute([$email, $token, $expires])) {
             return $token;
         }
         return false;
-    }
-
-    public function verifyPasswordResetToken($token)
+    }    public function verifyPasswordResetToken($token)
     {
+        if (empty($token)) {
+            error_log("Token is empty");
+            return false;
+        }
+
+        error_log("Verifying token: " . $token);
+        error_log("Token length: " . strlen($token));
+        
+        // First check if token exists
+        $query = "SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > NOW()";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$token]);
+        $tokenInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$tokenInfo) {
+            error_log("Token not found in database");
+            return false;
+        }
+        
+        error_log("Found token info: " . json_encode($tokenInfo));
+        
+        // Check if token is expired
+        if (strtotime($tokenInfo['expires_at']) < time()) {
+            error_log("Token has expired. Expires at: " . $tokenInfo['expires_at'] . ", Current time: " . date('Y-m-d H:i:s'));
+            return false;
+        }
+        
+        // Check if token is already used
+        if ($tokenInfo['used'] == 1) {
+            error_log("Token has already been used");
+            return false;
+        }
+        
         $query = "SELECT email FROM password_resets 
                  WHERE token = ? AND expires_at > NOW() AND used = 0";
         $stmt = $this->conn->prepare($query);

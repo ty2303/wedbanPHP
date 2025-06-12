@@ -324,6 +324,39 @@ include 'app/views/shares/header.php';
             const originalText = btn.html();
             btn.html('<i class="bi bi-arrow-repeat spin"></i> Đang thêm...').prop('disabled', true);
             
+            // Make AJAX request
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success toast
+                    const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                    toast.show();
+                    
+                    // Update button
+                    btn.html('<i class="bi bi-check"></i> Đã thêm').removeClass('btn-cart').addClass('btn-success');
+                    
+                    setTimeout(function() {
+                        btn.html(originalText).removeClass('btn-success').addClass('btn-cart').prop('disabled', false);
+                    }, 2000);
+                } else {
+                    // Show error message
+                    alert(data.message);
+                    if (data.message.includes('đăng nhập')) {
+                        window.location.href = '/webbanhang/Auth/login';
+                    }
+                    btn.html(originalText).prop('disabled', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.html(originalText).prop('disabled', false);
+            });
+            
             // Make an AJAX request to add the product to cart
             $.ajax({
                 url: url,

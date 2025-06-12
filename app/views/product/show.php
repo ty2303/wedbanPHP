@@ -242,30 +242,55 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cartForm) {
         cartForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const formData = new FormData(this);
+              const formData = new FormData(this);
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            
+
             // Add loading state
             submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Đang thêm...';
             submitBtn.disabled = true;
-            
-            // Simulate AJAX request (replace with actual AJAX when ready)
-            setTimeout(() => {
-                // Show success feedback
-                submitBtn.innerHTML = '<i class="bi bi-check me-2"></i> Đã thêm vào giỏ!';
-                submitBtn.classList.remove('btn-cart-large');
-                submitBtn.classList.add('btn-success');
-                
-                // Reset after 2 seconds
-                setTimeout(() => {
+
+            // Make AJAX request to add to cart
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success feedback
+                    submitBtn.innerHTML = '<i class="bi bi-check me-2"></i> Đã thêm vào giỏ!';
+                    submitBtn.classList.remove('btn-cart-large');
+                    submitBtn.classList.add('btn-success');
+                    
+                    // Reset after 2 seconds
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.classList.remove('btn-success');
+                        submitBtn.classList.add('btn-cart-large');
+                        submitBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    // Show error feedback
+                    alert(data.message);
+                    if (data.message.includes('đăng nhập')) {
+                        window.location.href = '/webbanhang/Auth/login';
+                    }
                     submitBtn.innerHTML = originalText;
-                    submitBtn.classList.remove('btn-success');
-                    submitBtn.classList.add('btn-cart-large');
                     submitBtn.disabled = false;
-                }, 2000);
-            }, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+              // Add loading state
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin me-2"></i> Đang thêm...';
+            submitBtn.disabled = true;
         });
     }
 });

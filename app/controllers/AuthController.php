@@ -182,65 +182,78 @@ class AuthController
     public function forgotPassword()
     {
         require 'app/views/auth/forgot-password.php';
-    }
-
-    public function sendResetLink()
+    }    public function sendResetLink()
     {
         if (!isset($_POST['email'])) {
             SessionHelper::setFlash('error', 'Vui lòng nhập email');
             header('Location: /webbanhang/Auth/forgotPassword');
-            return;
+            exit;
         }
 
         $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-        $token = $this->userModel->createPasswordResetToken($email);
+        error_log("Send Reset Link - Email: " . $email);
 
+        // Xóa session cũ nếu có
+        if (isset($_SESSION['reset_password_email'])) {
+            unset($_SESSION['reset_password_email']);
+        }
+
+        $token = $this->userModel->createPasswordResetToken($email);
         if ($token) {
-            // Tạo link đặt lại mật khẩu
-            $resetLink = "http://{$_SERVER['HTTP_HOST']}/webbanhang/Auth/resetPassword?token=" . $token;
-            
-            // Gửi email
-            $to = $email;
-            $subject = "Đặt lại mật khẩu - TITI Shop";
-            $message = "Xin chào,\n\n";
-            $message .= "Bạn vừa yêu cầu đặt lại mật khẩu tại TITI Shop. ";
-            $message .= "Vui lòng click vào link sau để đặt lại mật khẩu:\n\n";
-            $message .= $resetLink . "\n\n";
-            $message .= "Link này sẽ hết hạn sau 1 giờ.\n\n";
-            $message .= "Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.\n\n";
-            $message .= "Trân trọng,\nTITI Shop";
-            
-            $headers = "From: no-reply@titishop.com";
-            
-            if (mail($to, $subject, $message, $headers)) {
-                SessionHelper::setFlash('success', 'Link đặt lại mật khẩu đã được gửi đến email của bạn');
+            require_once('app/helpers/EmailHelper.php');
+            if (EmailHelper::sendPasswordResetEmail($email, $token)) {
+                // Lưu email vào session
+                $_SESSION['reset_password_email'] = $email;
+                $_SESSION['reset_password_time'] = time();
+
+                SessionHelper::setFlash('success', 'Mã xác nhận đã được gửi đến email của bạn. Vui lòng kiểm tra email và nhập mã.');
+                header('Location: /webbanhang/Auth/forgotPassword');
+                exit;
             } else {
                 SessionHelper::setFlash('error', 'Không thể gửi email. Vui lòng thử lại sau');
+                header('Location: /webbanhang/Auth/forgotPassword');
+                exit;
             }
         } else {
             SessionHelper::setFlash('error', 'Email không tồn tại trong hệ thống');
+            header('Location: /webbanhang/Auth/forgotPassword');
+            exit;
         }
-        
-        header('Location: /webbanhang/Auth/forgotPassword');
-    }
-
-    public function resetPassword()
+    }    public function resetPassword()
     {
-        if (!isset($_GET['token'])) {
-            header('Location: /webbanhang/Auth/login');
-            return;
+        // Kiểm tra xem người dùng đã yêu cầu reset password chưa
+        if (!isset($_SESSION['reset_password_email']) || !isset($_SESSION['reset_password_time'])) {
+            error_log("resetPassword - Session missing: reset_password_email or reset_password_time");
+            SessionHelper::setFlash('error', 'Vui lòng nhập email để nhận mã xác nhận');
+            header('Location: /webbanhang/Auth/forgotPassword');
+            exit;
         }
-        
-        require 'app/views/auth/reset-password.php';
-    }
 
-    public function updatePassword()
+        // Kiểm tra thời gian timeout (30 phút)
+        if (time() - $_SESSION['reset_password_time'] > 1800) {
+            error_log("resetPassword - Timeout exceeded");
+            unset($_SESSION['reset_password_email']);
+            unset($_SESSION['reset_password_time']);
+            SessionHelper::setFlash('error', 'Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.');
+            header('Location: /webbanhang/Auth/forgotPassword');
+            exit;
+        }
+
+        error_log("resetPassword - Session valid, displaying form");
+        // Hiển thị form nhập mã và mật khẩu mới
+        include 'app/views/auth/reset-password.php';
+    }    public function updatePassword()
     {
-        if (!isset($_POST['token']) || !isset($_POST['password']) || !isset($_POST['password_confirm'])) {
+        if (!isset($_POST['token']) || !isset($_POST['password']) || !isset($_POST['password_confirm']) || !isset($_SESSION['reset_password_email'])) {
+            error_log("Update Password - Missing required fields");
             SessionHelper::setFlash('error', 'Dữ liệu không hợp lệ');
-            header('Location: /webbanhang/Auth/login');
+            header('Location: /webbanhang/Auth/forgotPassword');
             return;
         }
+        
+        $email = $_SESSION['reset_password_email'];
+        $token = trim($_POST['token']);
+        error_log("Update Password - Verifying code: " . $token . " for email: " . $email);
 
         if ($_POST['password'] !== $_POST['password_confirm']) {
             SessionHelper::setFlash('error', 'Mật khẩu xác nhận không khớp');
@@ -254,14 +267,14 @@ class AuthController
             SessionHelper::setFlash('error', 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn');
             header('Location: /webbanhang/Auth/forgotPassword');
             return;
-        }
-
-        if ($this->userModel->resetPassword($tokenData['email'], $_POST['password'])) {
+        }        if ($this->userModel->resetPassword($tokenData['email'], $_POST['password'])) {
             SessionHelper::setFlash('success', 'Mật khẩu đã được đặt lại thành công');
+            // Xóa email khỏi session sau khi đặt lại mật khẩu thành công
+            unset($_SESSION['reset_password_email']);
             header('Location: /webbanhang/Auth/login');
         } else {
             SessionHelper::setFlash('error', 'Không thể đặt lại mật khẩu. Vui lòng thử lại');
-            header('Location: /webbanhang/Auth/resetPassword?token=' . $_POST['token']);
+            header('Location: /webbanhang/Auth/resetPassword');
         }
     }
 }

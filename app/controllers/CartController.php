@@ -31,6 +31,13 @@ class CartController
         }
     }    public function index()
     {
+        // Kiểm tra đăng nhập trước khi xem giỏ hàng
+        if (!SessionHelper::isLoggedIn()) {
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để xem giỏ hàng!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin truy cập trang giỏ hàng customer
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             SessionHelper::setFlash('info', 'Admin không cần sử dụng giỏ hàng. Bạn có thể quản lý đơn hàng từ trang quản lý.');
@@ -50,10 +57,25 @@ class CartController
         }
         
         include 'app/views/cart/index.php';
-    }
-      public function add($product_id, $quantity = 1)
+    }      public function add($product_id, $quantity = 1)
     {
-        // Ngăn admin sử dụng chức năng thêm vào giỏ hàng
+        // Kiểm tra đăng nhập trước khi thêm vào giỏ hàng
+        if (!SessionHelper::isLoggedIn()) {
+            // Nếu là AJAX request, trả về JSON response
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!'
+                ]);
+                exit;
+            }
+            
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
+        // Ngăn admin sử dụng chức năng thêm vào giỏ hàng 
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             // Nếu là AJAX request, trả về JSON response
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
@@ -82,13 +104,8 @@ class CartController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quantity'])) {
             $quantity = (int)$_POST['quantity'];
         }
-        
-        // If product is already in cart, increase quantity
-        if (isset($_SESSION['cart'][$product_id])) {
-            $_SESSION['cart'][$product_id] += $quantity;
-        } else {
-            $_SESSION['cart'][$product_id] = $quantity;
-        }
+          // Set the quantity directly instead of increasing it
+        $_SESSION['cart'][$product_id] = $quantity;
         
         $_SESSION['success'] = "Đã thêm sản phẩm vào giỏ hàng!";
         
@@ -113,9 +130,15 @@ class CartController
         } else {
             header('Location: /webbanhang/Cart');
         }
-    }
-      public function update()
+    }    public function update()
     {
+        // Kiểm tra đăng nhập trước khi cập nhật giỏ hàng
+        if (!SessionHelper::isLoggedIn()) {
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để sử dụng giỏ hàng!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin sử dụng chức năng cập nhật giỏ hàng
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             SessionHelper::setFlash('info', 'Admin không cần sử dụng giỏ hàng.');
@@ -138,9 +161,15 @@ class CartController
         }
         
         header('Location: /webbanhang/Cart');
-    }
-      public function remove($product_id)
+    }    public function remove($product_id)
     {
+        // Kiểm tra đăng nhập trước khi xóa khỏi giỏ hàng
+        if (!SessionHelper::isLoggedIn()) {
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để sử dụng giỏ hàng!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin sử dụng chức năng xóa khỏi giỏ hàng
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             SessionHelper::setFlash('info', 'Admin không cần sử dụng giỏ hàng.');
@@ -154,9 +183,15 @@ class CartController
         }
         
         header('Location: /webbanhang/Cart');
-    }
-      public function clear()
+    }    public function clear()
     {
+        // Kiểm tra đăng nhập trước khi xóa giỏ hàng
+        if (!SessionHelper::isLoggedIn()) {
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để sử dụng giỏ hàng!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin sử dụng chức năng xóa giỏ hàng
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             SessionHelper::setFlash('info', 'Admin không cần sử dụng giỏ hàng.');
@@ -391,9 +426,19 @@ class CartController
                 $count += $quantity;
             }        }
         return $count;
-    }
-      public function applyVoucher()
+    }    public function applyVoucher()
     {
+        // Kiểm tra đăng nhập trước khi áp dụng voucher
+        if (!SessionHelper::isLoggedIn()) {
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập để sử dụng voucher!']);
+                exit;
+            }
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để sử dụng voucher!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin sử dụng voucher trong giỏ hàng
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
@@ -450,9 +495,15 @@ class CartController
         }
         
         header('Location: /webbanhang/Cart');
-    }
-      public function removeVoucher()
+    }    public function removeVoucher()
     {
+        // Kiểm tra đăng nhập trước khi xóa voucher
+        if (!SessionHelper::isLoggedIn()) {
+            SessionHelper::setFlash('error', 'Vui lòng đăng nhập để sử dụng voucher!');
+            header('Location: /webbanhang/Auth/login');
+            exit;
+        }
+
         // Ngăn admin sử dụng voucher
         if (SessionHelper::isAdmin() || SessionHelper::isStaff()) {
             SessionHelper::setFlash('info', 'Admin không cần sử dụng voucher.');
